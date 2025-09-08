@@ -1,9 +1,9 @@
 databaseChangeLog:
   - include:
-      file: classpath:db/changelog/changes/001-create-roles-table.yaml
+      file: classpath:db/changelog/migrations/001-create-roles-table.yml
   - include:
-      file: classpath:db/changelog/changes/002-create-users-table.yaml
+      file: classpath:db/changelog/migrations/002-create-users-table.yml
   - include:
-      file: classpath:db/changelog/changes/003-insert-default-roles.yaml
+      file: classpath:db/changelog/migrations/003-insert-default-roles.yml
   - include:
-      file: classpath:db/changelog/changes/004-insert-default-users.yaml
+      file: classpath:db/changelog/migrations/004-insert-default-users.yml
