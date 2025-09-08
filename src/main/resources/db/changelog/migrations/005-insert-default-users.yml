@@ -14,8 +14,8 @@ databaseChangeLog:
                   value: admin@example.com
               - column:
                   name: password
-                  # BCrypt encoded "admin123"
-                  value: $2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW
+                  # BCrypt encoded "admin"
+                  value: $2a$10$OcHBcBNUnOYxWR9fUsqS1OPIvjLIgnMoNtfywqz.w0FN..3fZa8aS
               - column:
                   name: first_name
                   value: Admin
@@ -34,7 +34,7 @@ databaseChangeLog:
               - column:
                   name: password
                   # BCrypt encoded "user123"
-                  value: $2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmNSJZ.0FxO/BTk76klW
+                  value: $2a$10$OcHBcBNUnOYxWR9fUsqS1OPIvjLIgnMoNtfywqz.w0FN..3fZa8aS
               - column:
                   name: first_name
                   value: Regular

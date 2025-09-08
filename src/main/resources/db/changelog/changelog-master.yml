@@ -7,7 +7,7 @@ databaseChangeLog:
       file: classpath:/db/changelog/migrations/003-create-user_roles-table.yml
   - include:
       file: classpath:/db/changelog/migrations/004-insert-default-roles.yml
-  - include:
-      file: classpath:/db/changelog/migrations/005-insert-default-users.yml
-  - include:
-      file: classpath:/db/changelog/migrations/006-insert-user-roles.yml
+#  - include:
+#      file: classpath:/db/changelog/migrations/005-insert-default-users.yml
+#  - include:
+#      file: classpath:/db/changelog/migrations/006-insert-user-roles.yml

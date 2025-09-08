@@ -11,11 +11,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
+    //@Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 100)
-    private ERole name;
+    private String name;
 
-    public Role(Long id, ERole name) {
+    public Role(Long id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -32,11 +32,11 @@ public class Role {
         this.id = id;
     }
 
-    public ERole getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(ERole name) {
+    public void setName(String name) {
         this.name = name;
     }
 }
