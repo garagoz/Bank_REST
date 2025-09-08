@@ -15,14 +15,6 @@ public class Role {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    public Role(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Role() {
-
-    }
 
     public Long getId() {
         return id;

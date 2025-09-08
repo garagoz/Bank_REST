@@ -97,7 +97,7 @@ public class AuthController {
                     .collect(Collectors.toSet());
             for (String roleName : strRoles) {
                 if (!foundRoleNames.contains(roleName)) {
-                    throw new RoleNotFoundException("Role " + roleName + " is not found.");
+                    throw new RoleNotFoundException("Role "+roleName + " is not found.");
                 }
             }
             roles.addAll(foundRoles);
