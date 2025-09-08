@@ -1,8 +1,7 @@
 package com.example.bankcards.entity;
 
+import com.example.bankcards.entity.enums.ERole;
 import jakarta.persistence.*;
-
-import java.util.Set;
 
 @Entity
 @Table(name = "roles")
@@ -12,20 +11,19 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 100)
-    private String name;
+    private ERole name;
 
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    private Set<User> users;
-
-    // Constructors
-    public Role() {}
-
-    public Role(String name) {
+    public Role(Long id, ERole name) {
+        this.id = id;
         this.name = name;
     }
 
-    // Getters and Setters
+    public Role() {
+
+    }
+
     public Long getId() {
         return id;
     }
@@ -34,20 +32,11 @@ public class Role {
         this.id = id;
     }
 
-    public String getName() {
+    public ERole getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(ERole name) {
         this.name = name;
     }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
-    }
-
 }

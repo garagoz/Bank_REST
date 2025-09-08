@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 004-insert-default-users
+      id: 005-insert-default-users
       author: arslan
       changes:
         - insert:
@@ -22,12 +22,6 @@ databaseChangeLog:
               - column:
                   name: last_name
                   value: User
-              - column:
-                  name: enabled
-                  value: true
-              - column:
-                  name: role_id
-                  value: 1
         - insert:
             tableName: users
             columns:
@@ -47,9 +41,3 @@ databaseChangeLog:
               - column:
                   name: last_name
                   value: User
-              - column:
-                  name: enabled
-                  value: true
-              - column:
-                  name: role_id
-                  value: 2

@@ -14,7 +14,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none   # options: none, validate, update, create, create-drop
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -41,5 +41,5 @@ springdoc:
 
 # JWT Configuration
 jwt:
-  secret: mySecretKey123456789012345678901234567890
-  expiration: 86400000 # 24 hours in milliseconds
+  secret: 93ee8fde0d73e1dd3daa7e93d6d5613c7e17f43b6752dc300c64eca4f006af13
+  expirationMs: 86400000 # 24 hours in milliseconds

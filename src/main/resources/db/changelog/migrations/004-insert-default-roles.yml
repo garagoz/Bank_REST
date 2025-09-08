@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 003-insert-default-roles
+      id: 004-insert-default-roles
       author: arslan
       changes:
         - insert:

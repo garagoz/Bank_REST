@@ -34,28 +34,9 @@ databaseChangeLog:
                   name: first_name
                   type: VARCHAR(50)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: last_name
                   type: VARCHAR(50)
                   constraints:
-                    nullable: false
-              - column:
-                  name: enabled
-                  type: BOOLEAN
-                  defaultValue: true
-                  constraints:
-                    nullable: false
-              - column:
-                  name: role_id
-                  type: int
-                  constraints:
-                    nullable: false
-        - addForeignKeyConstraint:
-            baseTableName: users
-            baseColumnNames: role_id
-            constraintName: fk_users_role
-            referencedTableName: roles
-            referencedColumnNames: id
-            onDelete: RESTRICT
-            onUpdate: CASCADE
+                    nullable: true
