@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: classpath:db/changelog/changes/001-create-roles-table.yaml
+  - include:
+      file: classpath:db/changelog/changes/002-create-users-table.yaml
+  - include:
+      file: classpath:db/changelog/changes/003-insert-default-roles.yaml
+  - include:
+      file: classpath:db/changelog/changes/004-insert-default-users.yaml
