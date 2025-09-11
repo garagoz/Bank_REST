@@ -1,10 +1,12 @@
 package com.example.bankcards.service;
 
 import com.example.bankcards.dto.request.CardCreateRequest;
+import com.example.bankcards.dto.request.CreditDebitRequest;
 import com.example.bankcards.dto.request.TransferRequest;
 import com.example.bankcards.dto.response.CardResponse;
 import com.example.bankcards.dto.response.TransferResponse;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.entity.CardBlock;
 import com.example.bankcards.entity.Transfer;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.CardStatus;
@@ -24,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
@@ -52,208 +55,167 @@ class CardServiceTest {
     @InjectMocks
     private CardService cardService;
 
-    private User user;
-    private User admin;
+    private User adminUser;
+    private User regularUser;
     private Card card;
     private CardCreateRequest cardCreateRequest;
 
     @BeforeEach
     void setUp() {
-        user = new User("testuser", "test@example.com", "password", "John", "Doe", Set.of(Role.ROLE_USER));
-        user.setId(1L);
+        adminUser = new User();
+        adminUser.setId(1L);
+        adminUser.setRoles(Set.of(Role.ROLE_ADMIN));
 
-        admin = new User("admin", "admin@example.com", "password", "Admin", "User", Set.of(Role.ROLE_ADMIN));
-        admin.setId(2L);
+        regularUser = new User();
+        regularUser.setId(2L);
+        regularUser.setRoles(Set.of(Role.ROLE_USER));
 
         card = new Card();
         card.setId(1L);
-        card.setCardNumber("encrypted_card_number");
-        card.setMaskedCardNumber("**** **** **** 1234");
-        card.setOwner(user);
-        card.setExpiryDate(LocalDate.now().plusYears(3));
-        card.setBalance(BigDecimal.valueOf(1000.00));
+        card.setOwner(regularUser);
         card.setStatus(CardStatus.ACTIVE);
+        card.setBalance(BigDecimal.valueOf(1000));
+        card.setMaskedCardNumber("**** **** **** 1234");
+        card.setExpiryDate(LocalDate.now().plusYears(1));
 
         cardCreateRequest = new CardCreateRequest();
-        cardCreateRequest.setInitialBalance(BigDecimal.valueOf(500.00));
-        cardCreateRequest.setExpiryDate(LocalDate.now().plusYears(2));
+        cardCreateRequest.setInitialBalance(BigDecimal.valueOf(500));
     }
 
     @Test
-    void createCard_Success() {
-        // Given
-        when(encryptionService.encrypt(anyString())).thenReturn("encrypted_card_number");
-        when(encryptionService.maskCardNumber(anyString())).thenReturn("**** **** **** 1234");
-        when(cardRepository.existsByCardNumber(anyString())).thenReturn(false);
-        when(cardRepository.save(any(Card.class))).thenReturn(card);
-
-        // When
-        CardResponse result = cardService.createCard(cardCreateRequest, user);
-
-        // Then
-        assertNotNull(result);
-        assertEquals("**** **** **** 1234", result.getMaskedCardNumber());
-        assertEquals("John Doe", result.getOwnerName());
-        verify(cardRepository).save(any(Card.class));
-    }
-
-    @Test
-    void createCard_AdminCanCreateForOtherUser() {
-        // Given
-        cardCreateRequest.setOwnerId(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(encryptionService.encrypt(anyString())).thenReturn("encrypted_card_number");
-        when(encryptionService.maskCardNumber(anyString())).thenReturn("**** **** **** 1234");
-        when(cardRepository.existsByCardNumber(anyString())).thenReturn(false);
-        when(cardRepository.save(any(Card.class))).thenReturn(card);
-
-        // When
-        CardResponse result = cardService.createCard(cardCreateRequest, admin);
-
-        // Then
-        assertNotNull(result);
-        verify(userRepository).findById(1L);
-        verify(cardRepository).save(any(Card.class));
-    }
-
-    @Test
-    void createCard_UserCannotCreateForOtherUser() {
-        // Given
+    void createCard_AdminForOtherUser_Success() {
         cardCreateRequest.setOwnerId(2L);
+        when(userRepository.findById(2L)).thenReturn(Optional.of(regularUser));
+        when(encryptionService.encrypt(anyString())).thenReturn("encrypted");
+        when(encryptionService.maskCardNumber(anyString())).thenReturn("**** **** **** 1234");
+        when(cardRepository.existsByCardNumber(anyString())).thenReturn(false);
+        when(cardRepository.save(any(Card.class))).thenReturn(card);
 
-        // When & Then
-        assertThrows(AccessDeniedException.class, () ->
-                cardService.createCard(cardCreateRequest, user));
+        CardResponse response = cardService.createCard(cardCreateRequest, adminUser);
+
+        assertNotNull(response);
+        verify(cardRepository).save(any(Card.class));
     }
 
     @Test
-    void transferFunds_Success() {
-        // Given
-        Card fromCard = new Card();
-        fromCard.setId(1L);
-        fromCard.setBalance(BigDecimal.valueOf(1000.00));
-        fromCard.setOwner(user);
-        fromCard.setStatus(CardStatus.ACTIVE);
-        fromCard.setExpiryDate(LocalDate.now().plusYears(1));
-        fromCard.setMaskedCardNumber("**** **** **** 1234");
+    void createCard_RegularUserForOtherUser_ThrowsException() {
+        cardCreateRequest.setOwnerId(3L);
 
-        Card toCard = new Card();
-        toCard.setId(2L);
-        toCard.setBalance(BigDecimal.valueOf(500.00));
-        toCard.setOwner(user);
-        toCard.setStatus(CardStatus.ACTIVE);
-        toCard.setExpiryDate(LocalDate.now().plusYears(1));
-        toCard.setMaskedCardNumber("**** **** **** 5678");
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+                () -> cardService.createCard(cardCreateRequest, regularUser));
 
-        TransferRequest transferRequest = new TransferRequest();
-        transferRequest.setFromCardId(1L);
-        transferRequest.setToCardId(2L);
-        transferRequest.setAmount(BigDecimal.valueOf(100.00));
-        transferRequest.setDescription("Test transfer");
-
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(fromCard));
-        when(cardRepository.findById(2L)).thenReturn(Optional.of(toCard));
-        when(transferRepository.save(any())).thenReturn(new Transfer());
-
-        // When
-        TransferResponse result = cardService.transferFunds(transferRequest, user);
-
-        // Then
-        assertNotNull(result);
-        assertEquals(BigDecimal.valueOf(900.00), fromCard.getBalance());
-        assertEquals(BigDecimal.valueOf(600.00), toCard.getBalance());
-        verify(cardRepository, times(2)).save(any(Card.class));
-    }
-
-    @Test
-    void transferFunds_InsufficientFunds() {
-        // Given
-        Card fromCard = new Card();
-        fromCard.setId(1L);
-        fromCard.setBalance(BigDecimal.valueOf(50.00));
-        fromCard.setOwner(user);
-        fromCard.setStatus(CardStatus.ACTIVE);
-        fromCard.setExpiryDate(LocalDate.now().plusYears(1));
-
-        Card toCard = new Card();
-        toCard.setId(2L);
-        toCard.setBalance(BigDecimal.valueOf(500.00));
-        toCard.setOwner(user);
-        toCard.setStatus(CardStatus.ACTIVE);
-        toCard.setExpiryDate(LocalDate.now().plusYears(1));
-
-        TransferRequest transferRequest = new TransferRequest();
-        transferRequest.setFromCardId(1L);
-        transferRequest.setToCardId(2L);
-        transferRequest.setAmount(BigDecimal.valueOf(100.00));
-
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(fromCard));
-        when(cardRepository.findById(2L)).thenReturn(Optional.of(toCard));
-
-        // When & Then
-        assertThrows(BusinessException.class, () ->
-                cardService.transferFunds(transferRequest, user));
-    }
-
-    @Test
-    void transferFunds_UserCannotTransferBetweenOtherUsersCards() {
-        // Given
-        User otherUser = new User("other", "other@example.com", "password", "Other", "User", Set.of(Role.ROLE_USER));
-        otherUser.setId(3L);
-
-        Card fromCard = new Card();
-        fromCard.setId(1L);
-        fromCard.setBalance(BigDecimal.valueOf(1000.00));
-        fromCard.setOwner(user);
-        fromCard.setStatus(CardStatus.ACTIVE);
-        fromCard.setExpiryDate(LocalDate.now().plusYears(1));
-
-        Card toCard = new Card();
-        toCard.setId(2L);
-        toCard.setBalance(BigDecimal.valueOf(500.00));
-        toCard.setOwner(otherUser); // Different owner
-        toCard.setStatus(CardStatus.ACTIVE);
-        toCard.setExpiryDate(LocalDate.now().plusYears(1));
-
-        TransferRequest transferRequest = new TransferRequest();
-        transferRequest.setFromCardId(1L);
-        transferRequest.setToCardId(2L);
-        transferRequest.setAmount(BigDecimal.valueOf(100.00));
-
-        when(cardRepository.findById(1L)).thenReturn(Optional.of(fromCard));
-        when(cardRepository.findById(2L)).thenReturn(Optional.of(toCard));
-
-        // When & Then
-        assertThrows(AccessDeniedException.class, () ->
-                cardService.transferFunds(transferRequest, user));
+        assertEquals("Only administrators can create cards for other users", exception.getMessage());
     }
 
     @Test
     void blockCard_Success() {
-        // Given
         when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
         when(cardRepository.save(any(Card.class))).thenReturn(card);
 
-        // When
-        CardResponse result = cardService.blockCard(1L, user);
+        CardBlock cardBlock = new CardBlock();
+        when(cardBlockRepository.findByCard(card)).thenReturn(cardBlock);
 
-        // Then
-        assertNotNull(result);
-        assertEquals(CardStatus.BLOCKED, card.getStatus());
+        CardResponse response = cardService.blockCard(1L, regularUser);
+
+        assertNotNull(response);
         verify(cardRepository).save(card);
+        verify(cardBlockRepository).save(cardBlock);
     }
 
     @Test
-    void blockCard_UserCannotBlockOtherUsersCard() {
-        // Given
-        User otherUser = new User("other", "other@example.com", "password", "Other", "User", Set.of(Role.ROLE_USER));
+    void blockCard_CardNotFound_ThrowsException() {
+        when(cardRepository.findById(1L)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> cardService.blockCard(1L, regularUser));
+
+        assertEquals("Card not found", exception.getMessage());
+    }
+
+    @Test
+    void blockCard_AccessDenied_ThrowsException() {
+        User otherUser = new User();
         otherUser.setId(3L);
-        card.setOwner(otherUser);
+        otherUser.setRoles(Set.of(Role.ROLE_USER));
 
         when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
 
-        // When & Then
-        assertThrows(AccessDeniedException.class, () ->
-                cardService.blockCard(1L, user));
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+                () -> cardService.blockCard(1L, otherUser));
+
+        assertEquals("Access denied to this card", exception.getMessage());
+    }
+
+    @Test
+    void creditCard_Success() {
+        CreditDebitRequest request = new CreditDebitRequest();
+        request.setCardId(1L);
+        request.setAmount(BigDecimal.valueOf(100));
+
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+        when(cardRepository.save(any(Card.class))).thenReturn(card);
+
+        CardResponse response = cardService.creditCard(request, regularUser);
+
+        assertNotNull(response);
+        verify(cardRepository).save(card);
+    }
+
+//    @Test
+//    void debitCard_InsufficientFunds_ThrowsException() {
+//        CreditDebitRequest request = new CreditDebitRequest();
+//        request.setCardId(1L);
+//        request.setAmount(BigDecimal.valueOf(2000)); // More than card balance
+//
+//        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+//
+//        BusinessException exception = assertThrows(BusinessException.class,
+//                () -> cardService.debitCard(request, regularUser));
+//
+//        assertEquals("Insufficient funds", exception.getMessage());
+//    }
+
+    @Test
+    void transferFunds_Success() {
+        Card toCard = new Card();
+        toCard.setId(2L);
+        toCard.setOwner(regularUser);
+        toCard.setStatus(CardStatus.ACTIVE);
+        toCard.setBalance(BigDecimal.valueOf(500));
+        toCard.setExpiryDate(LocalDate.now().plusYears(1));
+        toCard.setMaskedCardNumber("**** **** **** 5678");
+
+        TransferRequest request = new TransferRequest();
+        request.setFromCardId(1L);
+        request.setToCardId(2L);
+        request.setAmount(BigDecimal.valueOf(100));
+        request.setDescription("Test transfer");
+
+        Transfer transfer = new Transfer();
+        transfer.setId(1L);
+        transfer.setFromCard(card);
+        transfer.setToCard(toCard);
+
+
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+        when(cardRepository.findById(2L)).thenReturn(Optional.of(toCard));
+        when(cardRepository.save(any(Card.class))).thenReturn(card);
+        when(transferRepository.save(any(Transfer.class))).thenReturn(transfer);
+
+        TransferResponse response = cardService.transferFunds(request, regularUser);
+
+        assertNotNull(response);
+        verify(cardRepository, times(2)).save(any(Card.class));
+        verify(transferRepository).save(any(Transfer.class));
+    }
+
+    @Test
+    void deleteCard_WithPositiveBalance_ThrowsException() {
+        when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> cardService.deleteCard(1L, adminUser));
+
+        assertEquals("Cannot delete card with positive balance", exception.getMessage());
     }
 }

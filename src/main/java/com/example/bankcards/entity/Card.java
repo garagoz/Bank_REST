@@ -66,6 +66,9 @@ public class Card {
 
     // Business methods
     public boolean isExpired() {
+        if (expiryDate == null) {
+            return true; // null means expired
+        }
         return LocalDate.now().isAfter(expiryDate);
     }
 

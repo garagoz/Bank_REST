@@ -2,10 +2,13 @@ package com.example.bankcards.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension .class)
 class EncryptionServiceTest {
 
     private EncryptionService encryptionService;
@@ -13,56 +16,58 @@ class EncryptionServiceTest {
     @BeforeEach
     void setUp() {
         encryptionService = new EncryptionService();
-        ReflectionTestUtils.setField(encryptionService, "secretKey", "MySecretKey12345");
+        // Using reflection to set the secret key for testing
+        try {
+            var field = EncryptionService.class.getDeclaredField("secretKey");
+            field.setAccessible(true);
+            field.set(encryptionService, "mySecretKey12345"); // 16 bytes key for AES
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set secret key", e);
+        }
     }
 
     @Test
-    void encrypt_Decrypt_Success() {
-        // Given
+    void encrypt_Success() {
         String plainText = "1234567890123456";
 
-        // When
         String encrypted = encryptionService.encrypt(plainText);
+
+        assertNotNull(encrypted);
+        assertNotEquals(plainText, encrypted);
+    }
+
+    @Test
+    void decrypt_Success() {
+        String plainText = "1234567890123456";
+        String encrypted = encryptionService.encrypt(plainText);
+
         String decrypted = encryptionService.decrypt(encrypted);
 
-        // Then
-        assertNotEquals(plainText, encrypted);
         assertEquals(plainText, decrypted);
     }
 
     @Test
     void maskCardNumber_Success() {
-        // Given
         String cardNumber = "1234567890123456";
 
-        // When
         String masked = encryptionService.maskCardNumber(cardNumber);
 
-        // Then
         assertEquals("**** **** **** 3456", masked);
     }
 
     @Test
-    void maskCardNumber_InvalidLength() {
-        // Given
-        String cardNumber = "123456";
+    void maskCardNumber_InvalidLength_ReturnsOriginal() {
+        String invalidCardNumber = "123456";
 
-        // When
-        String masked = encryptionService.maskCardNumber(cardNumber);
+        String masked = encryptionService.maskCardNumber(invalidCardNumber);
 
-        // Then
-        assertEquals(cardNumber, masked); // Should return original if invalid
+        assertEquals(invalidCardNumber, masked);
     }
 
     @Test
-    void maskCardNumber_Null() {
-        // Given
-        String cardNumber = null;
+    void maskCardNumber_Null_ReturnsNull() {
+        String masked = encryptionService.maskCardNumber(null);
 
-        // When
-        String masked = encryptionService.maskCardNumber(cardNumber);
-
-        // Then
         assertNull(masked);
     }
 }
