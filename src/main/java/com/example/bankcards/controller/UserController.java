@@ -1,0 +1,77 @@
+package com.example.bankcards.controller;
+
+import com.example.bankcards.dto.request.RegisterRequest;
+import com.example.bankcards.dto.response.ApiResponse;
+import com.example.bankcards.dto.response.UserResponse;
+import com.example.bankcards.entity.User;
+import com.example.bankcards.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/users")
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "User Management", description = "User management operations")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all users (Admin only)")
+    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
+            @AuthenticationPrincipal User currentUser,
+            Pageable pageable) {
+        Page<UserResponse> users = userService.getAllUsers(currentUser, pageable);
+        return ResponseEntity.ok(ApiResponse.success(users));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user by ID")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        UserResponse user = userService.getUserById(id, currentUser);
+        return ResponseEntity.ok(ApiResponse.success(user));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Create new user (Admin only)")
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+            @Valid @RequestBody RegisterRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        UserResponse user = userService.createUser(request, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("User created successfully", user));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update user")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody RegisterRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        UserResponse user = userService.updateUser(id, request, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("User updated successfully", user));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete user (Admin only)")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        userService.deleteUser(id, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
+    }
+}

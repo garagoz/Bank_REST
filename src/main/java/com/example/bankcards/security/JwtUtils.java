@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.security;
 
 import com.example.bankcards.entity.User;
@@ -17,10 +18,10 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${jwt.secret}")
+    @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expirationMs}")
+    @Value("${app.jwt.expiration}")
     private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
@@ -60,4 +61,4 @@ public class JwtUtils {
 
         return false;
     }
-}
+}*/

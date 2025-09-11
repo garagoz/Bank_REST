@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.security;
 
 import com.example.bankcards.service.CustomUserDetailsService;
@@ -59,4 +60,4 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         return null;
     }
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,4 +40,4 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 //    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
     }
 
-}
+}*/

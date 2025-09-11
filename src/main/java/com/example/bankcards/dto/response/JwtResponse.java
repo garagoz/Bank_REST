@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.dto.response;
 
 import java.util.List;
@@ -62,4 +63,4 @@ public class JwtResponse {
     public List<String> getRoles() {
         return roles;
     }
-}
+}*/

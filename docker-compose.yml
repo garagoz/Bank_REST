@@ -3,9 +3,9 @@ services:
     container_name: postgres_bank
     image: postgres:17.2
     environment:
+      POSTGRES_DB: bankdb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: bankdb
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -15,7 +15,9 @@ services:
     restart: unless-stopped
 
 #  app:
-#    build: .
+#    build:
+#       context: .
+#       dockerfile: Dockerfile
 #    container_name: bankapp
 #    restart: unless-stopped
 #    ports:

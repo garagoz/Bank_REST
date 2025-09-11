@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.controller;
 
 import com.example.bankcards.entity.Role;
@@ -55,3 +56,4 @@ public class RoleController {
         }
     }
 }
+*/

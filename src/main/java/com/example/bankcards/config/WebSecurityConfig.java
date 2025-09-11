@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.config;
 
 import com.example.bankcards.security.AuthEntryPointJwt;
@@ -75,4 +76,4 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-}
+}*/

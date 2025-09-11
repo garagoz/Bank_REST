@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
         ),
         servers = {
                 @Server(
-                        description = "bankcards API",
+                        description = "Local Server",
                         url = "http://localhost:8080"
                 )
         }

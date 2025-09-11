@@ -39,7 +39,10 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
 
-# JWT Configuration
-jwt:
-  secret: 93ee8fde0d73e1dd3daa7e93d6d5613c7e17f43b6752dc300c64eca4f006af13
-  expirationMs: 86400000 # 24 hours in milliseconds
+# JWT and Card Encryption Configuration
+app:
+  jwt:
+    secret: 93ee8fde0d73e1dd3daa7e93d6d5613c7e17f43b6752dc300c64eca4f006af13
+    expiration: 86400000 # 24 hours in milliseconds
+  encryption:
+    key: MySecretKey12345 # 16 characters for AES-128

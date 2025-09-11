@@ -12,8 +12,8 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: role_id
-                  type: BIGINT
+                  name: role_name
+                  type: VARCHAR(50)
                   constraints:
                     nullable: false
 
@@ -24,9 +24,9 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_user_roles_user
 
-        - addForeignKeyConstraint:
-            baseTableName: user_roles
-            baseColumnNames: role_id
-            referencedTableName: roles
-            referencedColumnNames: id
-            constraintName: fk_user_roles_role
+#        - addForeignKeyConstraint:
+#            baseTableName: user_roles
+#            baseColumnNames: role_id
+#            referencedTableName: roles
+#            referencedColumnNames: id
+#            constraintName: fk_user_roles_role

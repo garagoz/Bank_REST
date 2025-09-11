@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.service;
 
 import com.example.bankcards.entity.Role;
@@ -44,4 +45,4 @@ public class RoleService {
         }
         return false;
     }
-}
+}*/

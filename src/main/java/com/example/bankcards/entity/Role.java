@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.entity;
 
 import jakarta.persistence.*;
@@ -17,4 +18,4 @@ public class Role {
 
     @Column(nullable = false, unique = true, length = 100)
     private String name;
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.example.bankcards.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,4 +28,4 @@ public class TestController {
     public String adminAccess() {
         return "Admin Board.";
     }
-}
+}*/
