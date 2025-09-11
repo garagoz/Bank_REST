@@ -29,8 +29,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Card Management", description = "Card management operations")
 public class CardController {
 
-    @Autowired
-    private CardService cardService;
+    private final CardService cardService;
+
+    public CardController(CardService cardService) {
+        this.cardService = cardService;
+    }
 
     @PostMapping
     @Operation(summary = "Create a new card")
