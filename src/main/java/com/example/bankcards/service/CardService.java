@@ -87,18 +87,14 @@ public class CardService {
     }
 
     @Transactional(readOnly = true)
-    public Page<CardResponse> getUserCards(User user, String status, Pageable pageable) {
+    public Page<CardResponse> getUserCards(User user, Pageable pageable) {
         Page<Card> cards;
 
         boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
         if (isAdmin) {
-            cards = status != null ?
-                    cardRepository.findByStatus(CardStatus.valueOf(status.toUpperCase()), pageable) :
-                    cardRepository.findAll(pageable);
+            cards = cardRepository.findAll(pageable);
         } else {
-            cards = status != null ?
-                    cardRepository.findByOwnerAndStatus(user, CardStatus.valueOf(status.toUpperCase()), pageable) :
-                    cardRepository.findByOwner(user, pageable);
+            cards = cardRepository.findByOwner(user, pageable);
         }
 
         return cards.map(this::mapToResponse);

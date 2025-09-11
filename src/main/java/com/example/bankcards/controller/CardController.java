@@ -46,11 +46,8 @@ public class CardController {
 
     @GetMapping
     @Operation(summary = "Get user cards with pagination and filtering")
-    public ResponseEntity<ApiResponse<Page<CardResponse>>> getUserCards(
-            @AuthenticationPrincipal User currentUser,
-            @Parameter(description = "Filter by card status") @RequestParam(required = false) String status,
-            Pageable pageable) {
-        Page<CardResponse> cards = cardService.getUserCards(currentUser, status, pageable);
+    public ResponseEntity<ApiResponse<Page<CardResponse>>> getUserCards(@AuthenticationPrincipal User currentUser, Pageable pageable) {
+        Page<CardResponse> cards = cardService.getUserCards(currentUser, pageable);
         return ResponseEntity.ok(ApiResponse.success(cards));
     }
 
