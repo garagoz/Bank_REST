@@ -1,6 +1,7 @@
 package com.example.bankcards.dto.response;
 
 
+import com.example.bankcards.entity.enums.Role;
 import lombok.Getter;
 
 import java.util.Set;
@@ -54,7 +55,7 @@ public class AuthResponse {
         private String email;
         private String firstName;
         private String lastName;
-        private Set<String> roles;
+        private Set<Role> roles;
 
         private UserInfo(UserInfoBuilder builder) {
             this.id = builder.id;
@@ -75,7 +76,7 @@ public class AuthResponse {
             private String email;
             private String firstName;
             private String lastName;
-            private Set<String> roles;
+            private Set<Role> roles;
 
             public UserInfoBuilder id(Long id) {
                 this.id = id;
@@ -102,7 +103,7 @@ public class AuthResponse {
                 return this;
             }
 
-            public UserInfoBuilder roles(Set<String> roles) {
+            public UserInfoBuilder roles(Set<Role> roles) {
                 this.roles = roles;
                 return this;
             }
@@ -118,7 +119,7 @@ public class AuthResponse {
         public String getEmail() { return email; }
         public String getFirstName() { return firstName; }
         public String getLastName() { return lastName; }
-        public Set<String> getRoles() { return roles; }
+        public Set<Role> getRoles() { return roles; }
     }
 
 }

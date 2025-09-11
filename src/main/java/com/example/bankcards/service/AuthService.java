@@ -98,7 +98,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(user.getRoles().stream().map(Enum::name).collect(java.util.stream.Collectors.toSet()))
+                .roles(user.getRoles())
                 .build();
     }
 }

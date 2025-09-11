@@ -10,6 +10,7 @@ import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.CardStatus;
 import com.example.bankcards.entity.enums.Role;
 import com.example.bankcards.exception.BusinessException;
+import com.example.bankcards.repository.CardBlockRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.TransferRepository;
 import com.example.bankcards.repository.UserRepository;
@@ -41,6 +42,9 @@ class CardServiceTest {
 
     @Mock
     private TransferRepository transferRepository;
+
+    @Mock
+    private CardBlockRepository cardBlockRepository;
 
     @Mock
     private EncryptionService encryptionService;
