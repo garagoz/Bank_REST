@@ -17,13 +17,14 @@ public class TestController {
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_USER.name()) " +
+            "or hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     public String userAccess() {
         return "User Content.";
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     public String adminAccess() {
         return "Admin Board.";
     }

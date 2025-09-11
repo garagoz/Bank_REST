@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +29,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Get all users (Admin only)")
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(
             @AuthenticationPrincipal User currentUser,
@@ -49,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Create new user (Admin only)")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @Valid @RequestBody RegisterRequest request,
@@ -69,7 +68,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Delete user (Admin only)")
     public ResponseEntity<ApiResponse<Void>> deleteUser(
             @PathVariable Long id,

@@ -61,7 +61,7 @@ public class CardController {
     }
 
     @PutMapping("/{id}/block")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Block a card (Admin only)")
     public ResponseEntity<ApiResponse<CardResponse>> blockCard(
             @PathVariable Long id,
@@ -71,7 +71,7 @@ public class CardController {
     }
 
     @PutMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Activate a card (Admin only)")
     public ResponseEntity<ApiResponse<CardResponse>> activateCard(
             @PathVariable Long id,
@@ -81,7 +81,7 @@ public class CardController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Delete a card (Admin only)")
     public ResponseEntity<ApiResponse<Void>> deleteCard(
             @PathVariable Long id,
@@ -100,7 +100,7 @@ public class CardController {
     }
 
     @PostMapping("/credit")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Credit funds to a card (Admin only)")
     public ResponseEntity<ApiResponse<CardResponse>> creditCard(
             @Valid @RequestBody CreditDebitRequest request,
@@ -128,7 +128,7 @@ public class CardController {
     }
 
     @GetMapping("/block/request")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole(T(com.example.bankcards.entity.enums.Role).ROLE_ADMIN.name())")
     @Operation(summary = "Get all card block requests with pagination and filtering (Admin only)")
     public ResponseEntity<ApiResponse<Page<CardBlockResponse>>> getCardBlockRequests(Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(cardService.getCardBlocks(pageable)));
