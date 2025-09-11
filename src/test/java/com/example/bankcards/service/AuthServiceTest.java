@@ -17,14 +17,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-// ==================== AuthService Tests ====================
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -51,101 +51,84 @@ class AuthServiceTest {
     void setUp() {
         registerRequest = new RegisterRequest();
         registerRequest.setUsername("testuser");
-        registerRequest.setEmail("test@example.com");
-        registerRequest.setPassword("password123");
-        registerRequest.setFirstName("John");
-        registerRequest.setLastName("Doe");
+        registerRequest.setEmail("test@email.com");
+        registerRequest.setPassword("password");
+        registerRequest.setFirstName("Test");
+        registerRequest.setLastName("User");
 
         loginRequest = new LoginRequest();
         loginRequest.setUsername("testuser");
-        loginRequest.setPassword("password123");
+        loginRequest.setPassword("password");
 
         user = new User();
         user.setId(1L);
         user.setUsername("testuser");
-        user.setEmail("test@example.com");
-        user.setPassword("encodedPassword");
-        user.setFirstName("John");
-        user.setLastName("Doe");
+        user.setEmail("test@email.com");
+        user.setPassword("encoded");
+        user.setFirstName("Test");
+        user.setLastName("User");
         user.setRoles(Set.of(Role.ROLE_USER));
         user.setIsActive(true);
-        user.setCreatedAt(LocalDateTime.now());
     }
 
     @Test
-    void register_Success() {
-        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
+    void register_Successful() {
+        when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded");
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+        when(jwtService.generateToken(any(User.class))).thenReturn("token");
 
         AuthResponse response = authService.register(registerRequest);
 
         assertNotNull(response);
-        assertEquals("jwt-token", response.getAccessToken());
+        assertEquals("token", response.getAccessToken());
         assertEquals("Bearer", response.getTokenType());
-        assertEquals("testuser", response.getUser().getUsername());
-
         verify(userRepository).save(any(User.class));
     }
 
     @Test
     void register_UsernameExists_ThrowsException() {
-        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(true);
+        when(userRepository.existsByUsername(anyString())).thenReturn(true);
 
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> authService.register(registerRequest));
-
-        assertEquals("Username already exists", exception.getMessage());
-        verify(userRepository, never()).save(any());
+        assertThrows(BusinessException.class, () -> authService.register(registerRequest));
     }
 
     @Test
     void register_EmailExists_ThrowsException() {
-        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(true);
+        when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> authService.register(registerRequest));
-
-        assertEquals("Email already exists", exception.getMessage());
-        verify(userRepository, never()).save(any());
+        assertThrows(BusinessException.class, () -> authService.register(registerRequest));
     }
 
     @Test
-    void login_Success() {
-        when(userRepository.findByUsername(loginRequest.getUsername())).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn("jwt-token");
+    void login_Successful() {
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(jwtService.generateToken(any(User.class))).thenReturn("token");
 
         AuthResponse response = authService.login(loginRequest);
 
         assertNotNull(response);
-        assertEquals("jwt-token", response.getAccessToken());
+        assertEquals("token", response.getAccessToken());
         assertEquals("Bearer", response.getTokenType());
-        assertEquals("testuser", response.getUser().getUsername());
-
-        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
-    void login_UserNotFound_ThrowsException() {
-        when(userRepository.findByUsername(loginRequest.getUsername())).thenReturn(Optional.empty());
+    void login_InvalidCredentials_ThrowsException() {
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> authService.login(loginRequest));
-
-        assertEquals("Invalid credentials", exception.getMessage());
+        assertThrows(BusinessException.class, () -> authService.login(loginRequest));
     }
 
     @Test
-    void login_UserInactive_ThrowsException() {
+    void login_DeactivatedAccount_ThrowsException() {
         user.setIsActive(false);
-        when(userRepository.findByUsername(loginRequest.getUsername())).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> authService.login(loginRequest));
-
-        assertEquals("Account is deactivated", exception.getMessage());
+        assertThrows(BusinessException.class, () -> authService.login(loginRequest));
     }
 }

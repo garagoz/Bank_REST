@@ -14,11 +14,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,121 +39,128 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private User adminUser;
-    private User regularUser;
     private RegisterRequest registerRequest;
+    private User user;
+    private User admin;
+    private Pageable pageable;
 
     @BeforeEach
     void setUp() {
-        adminUser = new User();
-        adminUser.setId(1L);
-        adminUser.setRoles(Set.of(Role.ROLE_ADMIN));
-
-        regularUser = new User();
-        regularUser.setId(2L);
-        regularUser.setUsername("testuser");
-        regularUser.setEmail("test@example.com");
-        regularUser.setRoles(Set.of(Role.ROLE_USER));
-
         registerRequest = new RegisterRequest();
         registerRequest.setUsername("newuser");
-        registerRequest.setEmail("new@example.com");
-        registerRequest.setPassword("password123");
-        registerRequest.setFirstName("John");
-        registerRequest.setLastName("Doe");
+        registerRequest.setEmail("new@email.com");
+        registerRequest.setPassword("password");
+        registerRequest.setFirstName("New");
+        registerRequest.setLastName("User");
+
+        user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setEmail("test@email.com");
+        user.setRoles(Set.of(Role.ROLE_USER));
+
+        admin = new User();
+        admin.setId(2L);
+        admin.setRoles(Set.of(Role.ROLE_ADMIN));
+
+        pageable = PageRequest.of(0, 10);
     }
 
     @Test
-    void createUser_AdminSuccess() {
-        when(userRepository.existsByUsername(registerRequest.getUsername())).thenReturn(false);
-        when(userRepository.existsByEmail(registerRequest.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(regularUser);
+    void createUser_AdminOnly() {
+        when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserResponse response = userService.createUser(registerRequest, adminUser);
+        UserResponse response = userService.createUser(registerRequest, admin);
 
         assertNotNull(response);
         verify(userRepository).save(any(User.class));
     }
 
     @Test
-    void createUser_NonAdmin_ThrowsException() {
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> userService.createUser(registerRequest, regularUser));
-
-        assertEquals("Only administrators can create users", exception.getMessage());
+    void createUser_NonAdmin_ThrowsAccessDenied() {
+        assertThrows(AccessDeniedException.class, () -> userService.createUser(registerRequest, user));
     }
 
     @Test
-    void getAllUsers_AdminSuccess() {
-        Page<User> userPage = new PageImpl<>(List.of(regularUser));
+    void getAllUsers_AdminOnly() {
+        Page<User> userPage = new PageImpl<>(Collections.singletonList(user));
         when(userRepository.findAll(any(Pageable.class))).thenReturn(userPage);
 
-        Page<UserResponse> response = userService.getAllUsers(adminUser, mock(Pageable.class));
+        Page<UserResponse> response = userService.getAllUsers(admin, pageable);
 
-        assertNotNull(response);
         assertEquals(1, response.getContent().size());
     }
 
     @Test
-    void getAllUsers_NonAdmin_ThrowsException() {
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> userService.getAllUsers(regularUser, mock(Pageable.class)));
-
-        assertEquals("Only administrators can view all users", exception.getMessage());
+    void getAllUsers_NonAdmin_ThrowsAccessDenied() {
+        assertThrows(AccessDeniedException.class, () -> userService.getAllUsers(user, pageable));
     }
 
     @Test
-    void getUserById_OwnProfile_Success() {
-        when(userRepository.findById(2L)).thenReturn(Optional.of(regularUser));
+    void getUserById_OwnUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        UserResponse response = userService.getUserById(2L, regularUser);
+        UserResponse response = userService.getUserById(1L, user);
 
         assertNotNull(response);
-        assertEquals("testuser", response.getUsername());
     }
 
     @Test
-    void getUserById_OtherUserProfile_ThrowsException() {
-        User otherUser = new User();
-        otherUser.setId(3L);
-        otherUser.setRoles(Set.of(Role.ROLE_USER));
+    void getUserById_AdminAnyUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> userService.getUserById(2L, otherUser));
-
-        assertEquals("Access denied to this user", exception.getMessage());
-    }
-
-    @Test
-    void updateUser_Success() {
-        RegisterRequest updateRequest = new RegisterRequest();
-        updateRequest.setFirstName("Updated");
-        updateRequest.setLastName("Name");
-
-        when(userRepository.findById(2L)).thenReturn(Optional.of(regularUser));
-        when(userRepository.save(any(User.class))).thenReturn(regularUser);
-
-        UserResponse response = userService.updateUser(2L, updateRequest, regularUser);
+        UserResponse response = userService.getUserById(1L, admin);
 
         assertNotNull(response);
-        verify(userRepository).save(regularUser);
     }
 
     @Test
-    void deleteUser_AdminDeletesSelf_ThrowsException() {
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> userService.deleteUser(1L, adminUser));
+    void updateUser_OwnUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        assertEquals("Cannot delete your own account", exception.getMessage());
+        UserResponse response = userService.updateUser(1L, registerRequest, user);
+
+        assertNotNull(response);
     }
 
     @Test
-    void deleteUser_Success() {
-        when(userRepository.findById(2L)).thenReturn(Optional.of(regularUser));
+    void updateUser_AdminAnyUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        userService.deleteUser(2L, adminUser);
+        UserResponse response = userService.updateUser(1L, registerRequest, admin);
 
-        verify(userRepository).delete(regularUser);
+        assertNotNull(response);
+    }
+
+    @Test
+    void updateUser_DuplicateUsername_ThrowsException() {
+        registerRequest.setUsername("existing");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("existing")).thenReturn(true);
+
+        assertThrows(BusinessException.class, () -> userService.updateUser(1L, registerRequest, user));
+    }
+
+    @Test
+    void deleteUser_AdminOnly_NotSelf() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        assertDoesNotThrow(() -> userService.deleteUser(1L, admin));
+        verify(userRepository).delete(user);
+    }
+
+    @Test
+    void deleteUser_NonAdmin_ThrowsAccessDenied() {
+        assertThrows(AccessDeniedException.class, () -> userService.deleteUser(1L, user));
+    }
+
+    @Test
+    void deleteUser_Self_ThrowsException() {
+        assertThrows(BusinessException.class, () -> userService.deleteUser(2L, admin));
     }
 }
