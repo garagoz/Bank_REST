@@ -8,7 +8,9 @@ import com.example.bankcards.dto.response.ApiResponse;
 import com.example.bankcards.dto.response.CardBlockResponse;
 import com.example.bankcards.dto.response.CardResponse;
 import com.example.bankcards.dto.response.TransferResponse;
+import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
+import com.example.bankcards.entity.enums.CardStatus;
 import com.example.bankcards.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,10 +47,24 @@ public class CardController {
         return ResponseEntity.ok(ApiResponse.success("Card created successfully", card));
     }
 
+//    @GetMapping
+//    @Operation(summary = "Get user cards with pagination and filtering")
+//    public ResponseEntity<ApiResponse<Page<CardResponse>>> getUserCards(@AuthenticationPrincipal User currentUser, Pageable pageable) {
+//        Page<CardResponse> cards = cardService.getUserCards(currentUser, pageable);
+//        return ResponseEntity.ok(ApiResponse.success(cards));
+//    }
+
     @GetMapping
-    @Operation(summary = "Get user cards with pagination and filtering")
-    public ResponseEntity<ApiResponse<Page<CardResponse>>> getUserCards(@AuthenticationPrincipal User currentUser, Pageable pageable) {
-        Page<CardResponse> cards = cardService.getUserCards(currentUser, pageable);
+    @Operation(summary = "Get cards with pagination and filtering")
+    public ResponseEntity<ApiResponse<Page<CardResponse>>> getCards(
+            @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) String cardNumber,
+            @RequestParam(required = false) CardStatus status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CardResponse>  cards = cardService.getCards(currentUser, userId, cardNumber, status, pageable);
         return ResponseEntity.ok(ApiResponse.success(cards));
     }
 

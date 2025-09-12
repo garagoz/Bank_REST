@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,6 @@ public class UserControllerTest {
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals("User deleted successfully", response.getBody().getMessage());
-        assertEquals(null, response.getBody().getData());
+        assertNull(response.getBody().getData());
     }
 }

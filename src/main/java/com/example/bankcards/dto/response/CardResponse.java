@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class CardResponse {
     private Long id;
     private String maskedCardNumber;
+    private String cardNumber;
     private String ownerName;
     private LocalDate expiryDate;
     private CardStatus status;

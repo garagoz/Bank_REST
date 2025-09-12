@@ -60,8 +60,9 @@ public class CardService {
 
         // Only admin can create cards for other users
         User owner = currentUser;
+        boolean isAdmin = false;
         if (request.getOwnerId() != null) {
-            boolean isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
+            isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
             if (!isAdmin) {
                 throw new AccessDeniedException("Only administrators can create cards for other users");
             }
@@ -83,30 +84,69 @@ public class CardService {
         card.setCreatedAt(LocalDateTime.now());
 
         card = cardRepository.save(card);
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     @Transactional(readOnly = true)
     public Page<CardResponse> getUserCards(User user, Pageable pageable) {
         Page<Card> cards;
+        boolean isAdmin = false;
 
-        boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
+        isAdmin = user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
         if (isAdmin) {
             cards = cardRepository.findAll(pageable);
         } else {
             cards = cardRepository.findByOwner(user, pageable);
         }
 
-        return cards.map(this::mapToResponse);
+        return mapToResponsePaged(cards, isAdmin);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CardResponse> getCards(User currentUser, Long userId, String cardNumber, CardStatus status, Pageable pageable) {
+        Page<Card> cards;
+        boolean isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
+        if (isAdmin) {
+
+            if (cardNumber != null && status != null && userId != null) {
+                cards = cardRepository.findByCardNumberContainingAndStatusAndOwnerId(cardNumber, status, userId, pageable);
+            } else if (cardNumber != null && status != null) {
+                cards = cardRepository.findByCardNumberContainingAndStatus(cardNumber, status, pageable);
+            } else if (cardNumber != null && userId != null) {
+                cards = cardRepository.findByCardNumberContainingAndOwnerId(cardNumber, userId, pageable);
+            } else if (status != null && userId != null) {
+                cards = cardRepository.findByStatusAndOwnerId(status, userId, pageable);
+            } else if (cardNumber != null) {
+                cards = cardRepository.findByCardNumberContaining(cardNumber, pageable);
+            } else if (status != null) {
+                cards = cardRepository.findByStatus(status, pageable);
+            } else {
+                cards = cardRepository.findAll(pageable);
+            }
+        } else {
+
+            if (cardNumber != null && status != null) {
+                cards = cardRepository.findByCardNumberContainingAndStatusAndOwnerId(cardNumber, status, currentUser.getId(), pageable);
+            } else if (cardNumber != null) {
+                cards = cardRepository.findByCardNumberContainingAndOwnerId(cardNumber, currentUser.getId(), pageable);
+            } else if (status != null) {
+                cards = cardRepository.findByStatusAndOwnerId(status, currentUser.getId(), pageable);
+            } else {
+                cards = cardRepository.findByOwner(currentUser, pageable);
+            }
+        }
+
+        return mapToResponsePaged(cards, isAdmin);
     }
 
 
     @Transactional(readOnly = true)
     public CardResponse getCardById(Long cardId, User currentUser) {
+        boolean isAdmin;
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new BusinessException("Card not found"));
 
-        boolean isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
+        isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
         if (!isAdmin && !card.getOwner().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Access denied to this card");
         }
@@ -114,7 +154,7 @@ public class CardService {
         card.updateStatus();
         cardRepository.save(card);
 
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     public CardResponse blockCard(Long cardId, User currentUser) {
@@ -145,7 +185,7 @@ public class CardService {
         cardBlock.setUpdatedAt(LocalDateTime.now());
         cardBlockRepository.save(cardBlock);
 
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     public CardResponse activateCard(Long cardId, User currentUser) {
@@ -165,7 +205,7 @@ public class CardService {
         card.setUpdatedAt(LocalDateTime.now());
         card = cardRepository.save(card);
 
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     public void deleteCard(Long cardId, User currentUser) {
@@ -207,7 +247,7 @@ public class CardService {
         card.setUpdatedAt(LocalDateTime.now());
         card = cardRepository.save(card);
 
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     public CardResponse debitCard(CreditDebitRequest request, User currentUser) {
@@ -236,7 +276,7 @@ public class CardService {
         card.setUpdatedAt(LocalDateTime.now());
         card = cardRepository.save(card);
 
-        return mapToResponse(card);
+        return mapToResponse(card, isAdmin);
     }
 
     public TransferResponse transferFunds(TransferRequest request, User currentUser) {
@@ -354,7 +394,7 @@ public class CardService {
         return generated;
     }
 
-    private CardResponse mapToResponse(Card card) {
+    private CardResponse mapToResponse(Card card, boolean includeDecrypted) {
         CardResponse response = new CardResponse();
         response.setId(card.getId());
         response.setMaskedCardNumber(card.getMaskedCardNumber());
@@ -363,7 +403,15 @@ public class CardService {
         response.setStatus(card.getStatus());
         response.setBalance(card.getBalance());
         response.setCreatedAt(card.getCreatedAt());
+
+        if (includeDecrypted) {
+            response.setCardNumber(encryptionService.decrypt(card.getCardNumber()));
+        }
         return response;
+    }
+
+    private Page<CardResponse> mapToResponsePaged(Page<Card> cards, boolean includeDecrypted) {
+        return cards.map(card -> mapToResponse(card, includeDecrypted));
     }
 
     private TransferResponse mapTransferToResponse(Transfer transfer) {
