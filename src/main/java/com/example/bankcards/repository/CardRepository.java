@@ -13,7 +13,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Page<Card> findByOwner(User owner, Pageable pageable);
     boolean existsByCardNumber(String cardNumber);
 
-    Page<Card> findByOwnerId(Long userId, Pageable pageable);
     Page<Card> findByCardNumberContaining(String cardNumber, Pageable pageable);
     Page<Card> findByStatus(CardStatus status, Pageable pageable);
     Page<Card> findByCardNumberContainingAndStatus(String cardNumber, CardStatus status, Pageable pageable);

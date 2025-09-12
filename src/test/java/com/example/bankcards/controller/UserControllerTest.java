@@ -49,9 +49,11 @@ public class UserControllerTest {
     @Test
     void getAllUsers_ShouldReturnSuccessResponse() {
         Page<UserResponse> userPage = new PageImpl<>(Collections.singletonList(userResponse));
-        when(userService.getAllUsers(any(User.class), any(Pageable.class))).thenReturn(userPage);
+        when(userService.getUsers(any(User.class), any(), any(), any(), any(Pageable.class))).thenReturn(userPage);
 
-        ResponseEntity<ApiResponse<Page<UserResponse>>> response = userController.getAllUsers(currentUser, pageable);
+        ResponseEntity<ApiResponse<Page<UserResponse>>> response = userController.getAllUsers(
+                currentUser, null, null, null, 0, 10
+        );
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals(userPage, response.getBody().getData());

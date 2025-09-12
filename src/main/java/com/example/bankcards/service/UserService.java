@@ -71,6 +71,27 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Page<UserResponse> getUsers(User currentUser, String username, String firstName, String lastName, Pageable pageable) {
+        boolean isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
+
+        if (!isAdmin) {
+            throw new AccessDeniedException("Only administrators can view all users");
+        }
+
+        if (firstName != null && lastName != null) {
+            return userRepository.findByFirstNameContainingAndLastNameContaining(firstName, lastName, pageable).map(this::mapToResponse);
+        } else if (username != null) {
+            return userRepository.findByUsernameContaining(username, pageable).map(this::mapToResponse);
+        } else if (firstName != null) {
+            return userRepository.findByFirstNameContaining(firstName, pageable).map(this::mapToResponse);
+        } else if (lastName != null) {
+            return userRepository.findByLastNameContaining(lastName, pageable).map(this::mapToResponse);
+        } else {
+            return userRepository.findAll(pageable).map(this::mapToResponse);
+        }
+    }
+
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long userId, User currentUser) {
 
         boolean isAdmin = currentUser.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.name()));
