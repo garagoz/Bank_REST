@@ -103,16 +103,21 @@ The application uses **PostgreSQL** as the database and implements **JWT-based a
    cd Bank_REST
    ```
 
-2. **Start the application with Docker Compose**
+2. **Build with maven**
+   ```bash
+   mvn clean package -DskipTests
+   ```
+   
+3. **Start the application with Docker Compose**
    ```bash
    docker-compose up -d
    ```
 
-3. **Wait for services to start**
+4. **Wait for services to start**
    - Database: `http://localhost:5432`
    - Application: `http://localhost:8080`
 
-4. **Access the API Documentation**
+5. **Access the API Documentation**
    - Swagger UI: `http://localhost:8080/swagger-ui.html`
    - API Docs: `http://localhost:8080/api-docs`
 
@@ -135,8 +140,8 @@ The application uses **PostgreSQL** as the database and implements **JWT-based a
 
    ```
    spring.datasource.url=jdbc:postgresql://localhost:5432/bankdb
-   spring.datasource.username=admin
-   spring.datasource.password=admin
+   spring.datasource.username=admin        #your db username
+   spring.datasource.password=admin        #your db password
    spring.jpa.hibernate.ddl-auto=none
    ```
 
