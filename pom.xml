@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example.bankcards</groupId>
-	<artifactId>Bank_REST</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>bankapi</artifactId>
+	<version>v1</version>
 	<name>bankcards</name>
 	<packaging>jar</packaging>
 	<description>Spring Boot Bank_REST</description>

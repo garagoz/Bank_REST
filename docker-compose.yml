@@ -18,10 +18,11 @@ services:
     build:
        context: .
        dockerfile: Dockerfile
-    container_name: bank_api
+    image: bank-api:latest
+    container_name: bank-api
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bankdb
       SPRING_DATASOURCE_USERNAME: admin

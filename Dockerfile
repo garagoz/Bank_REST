@@ -2,7 +2,7 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-COPY target/Bank_REST-0.0.1-SNAPSHOT.jar app.jar
+COPY target/bankapi-v1.jar app.jar
 
 EXPOSE 8080
 
