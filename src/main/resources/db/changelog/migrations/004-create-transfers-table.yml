@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 008-create-transfers-table
+      id: 004-create-transfers-table
       author: arslan
       changes:
         - createTable:

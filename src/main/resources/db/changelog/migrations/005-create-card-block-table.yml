@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 002-create-users-table
+      id: 005-create-card-block-table
       author: arslan
       changes:
         - createTable:
-            tableName: users
+            tableName: card_block
             columns:
               - column:
                   name: id
@@ -14,38 +14,22 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: username
-                  type: VARCHAR(50)
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: email
-                  type: VARCHAR(100)
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: password
-                  type: VARCHAR(255)
+                  name: card_id
+                  type: BIGINT
                   constraints:
                     nullable: false
               - column:
-                  name: first_name
-                  type: VARCHAR(50)
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: PENDING
                   constraints:
-                    nullable: true
+                    nullable: false
               - column:
-                  name: last_name
-                  type: VARCHAR(50)
+                  name: description
+                  type: VARCHAR(500)
+                  defaultValue: ACTIVE
                   constraints:
-                    nullable: true
-              - column:
-                  name: is_active
-                  type: BOOLEAN
-                  defaultValueBoolean: true
-                  constraints:
-                    nullable: true
+                    nullable: false
               - column:
                   name: created_at
                   type: TIMESTAMP
@@ -57,3 +41,11 @@ databaseChangeLog:
                   type: TIMESTAMP
                   constraints:
                     nullable: true
+
+        - addForeignKeyConstraint:
+            baseTableName: card_block
+            baseColumnNames: card_id
+            referencedTableName: cards
+            referencedColumnNames: id
+            constraintName: fk_card_block_from_card
+            onDelete: CASCADE

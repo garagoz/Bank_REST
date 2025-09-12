@@ -1,19 +1,11 @@
 databaseChangeLog:
-#  - include:
-#      file: classpath:/db/changelog/migrations/001-create-roles-table.yml
   - include:
-      file: classpath:/db/changelog/migrations/002-create-users-table.yml
+      file: classpath:/db/changelog/migrations/001-create-users-table.yml
   - include:
-      file: classpath:/db/changelog/migrations/003-create-user_roles-table.yml
-#  - include:
-#      file: classpath:/db/changelog/migrations/004-insert-default-roles.yml
-#  - include:
-#      file: classpath:/db/changelog/migrations/005-insert-default-users.yml
-#  - include:
-#      file: classpath:/db/changelog/migrations/006-insert-user-roles.yml
+      file: classpath:/db/changelog/migrations/002-create-user_roles-table.yml
   - include:
-      file: classpath:/db/changelog/migrations/007-create-card-table.yml
+      file: classpath:/db/changelog/migrations/003-create-card-table.yml
   - include:
-      file: classpath:/db/changelog/migrations/008-create-transfers-table.yml
+      file: classpath:/db/changelog/migrations/004-create-transfers-table.yml
   - include:
-      file: classpath:/db/changelog/migrations/009-create-card-block-table.yml
+      file: classpath:/db/changelog/migrations/005-create-card-block-table.yml
