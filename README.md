@@ -67,14 +67,14 @@ The application uses **PostgreSQL** as the database and implements **JWT-based a
 
 | Endpoint                    | Method | Description                                                        |
 |-----------------------------|--------|--------------------------------------------------------------------|
-| `/api/cards`                | POST   | Create a new card                                                  |
-| `/api/cards/transfer`       | POST   | Transfer funds between cards                                       |
+| `/api/cards`                | POST   | Create a new card (Admin only)                                     |
+| `/api/cards/transfer`       | POST   | Transfer funds between cards (User's own card)                     |
 | `/api/cards/debit`          | POST   | Debit funds from a card                                            |
 | `/api/cards/credit`         | POST   | Credit funds to a card (Admin only)                                |
 | `/api/cards/block/request`  | POST   | Create card block request by user                                  |
 | `/api/cards/{id}/block`     | PUT    | Block a card (Admin only)                                          |
 | `/api/cards/{id}/activate`  | PUT    | Activate a card (Admin only)                                       |
-| `/api/cards`                | GET    | Get cards with pagination and filtering                            |
+| `/api/cards`                | GET    | Get cards with pagination and filtering (User's own cards)         |
 | `/api/cards/block/request`  | GET    | Get card block requests with pagination and filtering (Admin only) |
 | `/api/cards/{id}`           | GET    | Get card by ID                                                     |
 | `/api/cards/{id}`           | DELETE | Delete a card (Admin only)                                         |
