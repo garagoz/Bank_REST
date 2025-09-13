@@ -1,6 +1,6 @@
 # 🛠️ Development of Bank Card Management System
 
-This project is a backend application for managing bank cards, built using **Spring Boot** and **Java 17**. It provides **RESTful APIs** for user registration, authentication, and CRUD operations on bank cards. 
+This project is a backend application for managing bank cards, built using **Spring Boot** and **Java 17**. It provides **RESTful APIs** for user registration, authentication and CRUD operations on users and bank cards. 
 The application uses **PostgreSQL** as the database and implements **JWT-based authentication** for secure access.
 
 ---
