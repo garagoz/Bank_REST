@@ -27,9 +27,9 @@ spring:
 # Logging
 logging:
   level:
-    com.example: DEBUG
-    org.springframework.security: DEBUG
-    liquibase: INFO
+    com.example: debug
+    org.springframework.security: trace
+    liquibase: info
 
 # Swagger/OpenAPI Configuration
 springdoc:
